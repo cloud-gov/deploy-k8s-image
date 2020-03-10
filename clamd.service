@@ -1,0 +1,28 @@
+### BEGIN INIT INFO
+# Provides:		clamd
+# Required-Start:	$remote_fs $syslog
+# Required-Stop:	$remote_fs $syslog
+# Default-Start:	2 3 4 5
+# Default-Stop:
+# Short-Description:	ClamAV Daemom
+### END INIT INFO
+
+
+[Unit]
+Description=Clam AntiVirus userspace daemon
+Documentation=man:clamd(8) man:clamd.conf(5) https://www.clamav.net/documents/
+Requires=clamav-daemon.socket
+# Check for database existence
+ConditionPathExistsGlob=/usr/local/clamav/database/main.{c[vl]d,inc}
+ConditionPathExistsGlob=/usr/local/clamav/database/daily.{c[vl]d,inc}
+
+[Service]
+ExecStart=/usr/local/clamav/sbin/clamd -c /etc/clamd.conf --foreground=true
+# Reload the database
+ExecReload=/bin/kill -USR2 $MAINPID
+StandardOutput=syslog
+TimeoutStartSec=420
+
+[Install]
+WantedBy=multi-user.target
+Also=clamav-daemon.socket
